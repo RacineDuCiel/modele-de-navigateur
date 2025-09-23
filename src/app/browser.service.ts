@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,16 @@ export class BrowserService {
 
 // @ts-ignore
   electronAPI = window.electronAPI;
+
+  constructor(private zone: NgZone) {
+    if (this.electronAPI?.onUrlChanged) {
+      this.electronAPI.onUrlChanged((url: string) => {
+        this.zone.run(() => {
+        this.url = url;
+      });
+    });
+    }
+}
 
   toogleDevTool() {
     this.electronAPI.toogleDevTool();

@@ -11,4 +11,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   goToPage: (url) => ipcRenderer.invoke('go-to-page', url),
   currentUrl: () => ipcRenderer.invoke('current-url'),
   navigateHome: () => ipcRenderer.send('navigate-home'),
+
+  onUrlChanged: (callback) => ipcRenderer.on('url-changed', (_event, url) => callback(url)),
+
 })

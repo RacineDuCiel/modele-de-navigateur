@@ -1,6 +1,16 @@
 const { app, WebContentsView, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 
+// Disable hardware acceleration to fix VSync errors on Linux
+app.disableHardwareAcceleration();
+
+// Add Chrome command line switches to improve graphics performance
+app.commandLine.appendSwitch('--disable-gpu-sandbox');
+app.commandLine.appendSwitch('--disable-software-rasterizer');
+app.commandLine.appendSwitch('--disable-background-timer-throttling');
+app.commandLine.appendSwitch('--disable-backgrounding-occluded-windows');
+app.commandLine.appendSwitch('--disable-renderer-backgrounding');
+
 app.whenReady().then(() => {
 
   // BrowserWindow initiate the rendering of the angular toolbar
@@ -29,11 +39,9 @@ app.whenReady().then(() => {
     view.setBounds({ x: 0, y: 55, width: winSize.width, height: winSize.height });
   }
 
-    win.webContents.openDevTools({ mode: 'detach' });
-
   // Register events handling from the toolbar
   ipcMain.on('toogle-dev-tool', () => {
-    if (winContent.isDevToolsOpened()) {
+    if (win.webContents.isDevToolsOpened()) {
       win.webContents.closeDevTools();
     } else {
       win.webContents.openDevTools({ mode: 'detach' });
@@ -69,6 +77,10 @@ app.whenReady().then(() => {
     return view.webContents.getURL();
   });
 
+  ipcMain.on('navigate-home', () => {
+    view.webContents.loadURL('https://amiens.unilasalle.fr');
+  });
+
   //Register events handling from the main windows
   win.once('ready-to-show', () => {
     fitViewToWin();
@@ -78,4 +90,11 @@ app.whenReady().then(() => {
   win.on('resized', () => {
     fitViewToWin();
   });
+
+  // Listen to navigation events to update the address bar
+  view.webContents.on('did-navigate', () => {
+    win.webContents.send('url-changed', view.webContents.getURL());
+  });
+
+
 })
