@@ -35,6 +35,11 @@ export class BrowserService {
       .then(() => this.updateHistory());
   }
 
+  goHome() {
+    this.url = 'https://amiens.unilasalle.fr';
+    this.goToPage(this.url);
+  }
+
   setToCurrentUrl() {
     this.electronAPI.currentUrl()
       .then((url :string) => {
