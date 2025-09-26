@@ -22,6 +22,13 @@
         <button mat-icon-button (click)="refreshCookies()" matTooltip="Actualiser">
           <mat-icon>refresh</mat-icon>
         </button>
+        <button mat-icon-button
+                (click)="clearCookiesHistory()"
+                matTooltip="Supprimer l'historique des cookies"
+                [disabled]="isClearingCookies">
+          <mat-icon *ngIf="!isClearingCookies">delete_sweep</mat-icon>
+          <mat-icon *ngIf="isClearingCookies">hourglass_top</mat-icon>
+        </button>
         <button mat-icon-button (click)="resetGraphView()" matTooltip="Recentrer le graphe" [disabled]="!graphInitialized">
           <mat-icon>center_focus_strong</mat-icon>
         </button>

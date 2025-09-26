@@ -18,11 +18,11 @@ import type { Force } from 'd3';
     CommonModule, 
     MatButtonModule, 
     MatIconModule, 
-    MatTableModule, 
-    MatCardModule, 
-  MatTabsModule,
-  MatBadgeModule,
-  MatTooltipModule
+    MatTableModule,
+    MatCardModule,
+    MatTabsModule,
+    MatBadgeModule,
+    MatTooltipModule
   ],
   templateUrl: './cookies.component.html',
   styleUrls: ['./cookies.component.css']
@@ -39,6 +39,7 @@ export class CookiesComponent implements OnInit, AfterViewInit, OnDestroy {
   showCookiePanel = false;
   graphData: {nodes: CookieGraphNode[], links: CookieGraphLink[]} = {nodes: [], links: []};
   graphInitialized = false;
+  isClearingCookies = false;
 
   private panelResizeObserver?: ResizeObserver;
   private panelStateFrameId: number | null = null;
@@ -106,6 +107,27 @@ export class CookiesComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.showCookiePanel) {
       this.createGraph();
       this.schedulePanelStateUpdate();
+    }
+  }
+
+  async clearCookiesHistory(): Promise<void> {
+    if (this.isClearingCookies) {
+      return;
+    }
+
+    this.isClearingCookies = true;
+
+    try {
+      const cleared = await this.cookieService.clearAllCookies();
+      if (cleared) {
+        await this.refreshPanelData();
+        if (this.showCookiePanel) {
+          this.createGraph();
+          this.schedulePanelStateUpdate();
+        }
+      }
+    } finally {
+      this.isClearingCookies = false;
     }
   }
 

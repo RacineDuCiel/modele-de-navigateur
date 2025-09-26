@@ -18,6 +18,7 @@ class CookieServiceStub {
     links: []
   }));
   setCookiePanelState = jasmine.createSpy('setCookiePanelState');
+  clearAllCookies = jasmine.createSpy('clearAllCookies').and.callFake(() => Promise.resolve(true));
 }
 
 describe('CookiesComponent', () => {
@@ -80,5 +81,20 @@ describe('CookiesComponent', () => {
     tick();
 
     expect(cookieService.setCookiePanelState).toHaveBeenCalledWith({ open: false, width: 0 });
+  }));
+
+  it('should clear cookies history when requested', fakeAsync(() => {
+    component.showCookiePanel = true;
+
+    component.clearCookiesHistory();
+    flushMicrotasks();
+    tick();
+    fixture.detectChanges();
+    tick();
+
+    expect(cookieService.clearAllCookies).toHaveBeenCalledTimes(1);
+    expect(cookieService.getAllCookies).toHaveBeenCalledTimes(2); // Initial load + refresh
+    expect(cookieService.getCookieStats).toHaveBeenCalledTimes(2);
+    expect(cookieService.getCookieGraphData).toHaveBeenCalledTimes(1);
   }));
 });

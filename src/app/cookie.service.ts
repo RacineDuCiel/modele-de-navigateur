@@ -86,6 +86,16 @@ export class CookieService {
     }
   }
 
+  async clearAllCookies(): Promise<boolean> {
+    try {
+      const result = await this.electronAPI.clearCookies();
+      return !!result;
+    } catch (error) {
+      console.error('Error clearing cookies:', error);
+      return false;
+    }
+  }
+
   /**
    * Transforme les cookies en données de graphe
    * Retourne les nœuds (domaines et cookies) et les liens

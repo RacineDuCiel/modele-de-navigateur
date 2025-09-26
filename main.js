@@ -119,6 +119,16 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('clear-cookies', async () => {
+    try {
+      await view.webContents.session.clearStorageData({ storages: ['cookies'] });
+      return true;
+    } catch (error) {
+      console.error('Error clearing cookies:', error);
+      return false;
+    }
+  });
+
   //Register events handling from the main windows
   win.once('ready-to-show', () => {
     fitViewToWin();
