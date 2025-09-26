@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +27,7 @@ import * as d3 from 'd3';
 export class CookiesComponent implements OnInit, AfterViewInit {
   
   @ViewChild('cookieGraph', { static: false }) graphElement!: ElementRef;
+  @ViewChild('cookiePanel', { static: false }) cookiePanel!: ElementRef<HTMLDivElement>;
   
   cookies: CookieData[] = [];
   cookieStats: any = null;
@@ -61,7 +62,14 @@ export class CookiesComponent implements OnInit, AfterViewInit {
       await this.loadStats();
       await this.loadGraphData();
       // Petit délai pour s'assurer que le DOM est rendu
-      setTimeout(() => this.createGraph(), 100);
+      setTimeout(() => {
+        this.createGraph();
+        this.schedulePanelStateUpdate();
+      }, 100);
+      this.schedulePanelStateUpdate();
+    }
+    if (!this.showCookiePanel) {
+      this.cookieService.setCookiePanelState({ open: false, width: 0 });
     }
   }
 
@@ -196,5 +204,27 @@ export class CookiesComponent implements OnInit, AfterViewInit {
         .attr('x', (d: any) => d.x)
         .attr('y', (d: any) => d.y);
     });
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.showCookiePanel) {
+      this.schedulePanelStateUpdate();
+    }
+  }
+
+  private schedulePanelStateUpdate(): void {
+    requestAnimationFrame(() => {
+      if (!this.showCookiePanel) {
+        return;
+      }
+
+      const width = this.getPanelWidth();
+      this.cookieService.setCookiePanelState({ open: true, width });
+    });
+  }
+
+  private getPanelWidth(): number {
+    return this.cookiePanel?.nativeElement?.offsetWidth || 0;
   }
 }

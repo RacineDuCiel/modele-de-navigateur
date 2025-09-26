@@ -52,6 +52,14 @@ export class CookieService {
     }
   }
 
+  setCookiePanelState(state: { open: boolean; width: number }): void {
+    try {
+      this.electronAPI?.setCookiePanelState?.(state);
+    } catch (error) {
+      console.error('Error notifying cookie panel state:', error);
+    }
+  }
+
   /**
    * Transforme les cookies en données de graphe
    * Retourne les nœuds (domaines et cookies) et les liens

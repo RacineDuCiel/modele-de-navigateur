@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Cookie management methods
   getCookies: () => ipcRenderer.invoke('get-cookies'),
   getCookiesForDomain: (domain) => ipcRenderer.invoke('get-cookies-for-domain', domain),
+  setCookiePanelState: (state) => ipcRenderer.send('cookie-panel-state', state),
 
   onUrlChanged: (callback) => ipcRenderer.on('url-changed', (_event, url) => callback(url)),
 

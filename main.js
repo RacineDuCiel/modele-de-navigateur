@@ -13,6 +13,9 @@ app.commandLine.appendSwitch('--disable-renderer-backgrounding');
 
 app.whenReady().then(() => {
 
+  const toolbarHeight = 128;
+  let cookiePanelWidth = 0;
+
   // BrowserWindow initiate the rendering of the angular toolbar
   const win = new BrowserWindow({
     width: 800,
@@ -33,10 +36,17 @@ app.whenReady().then(() => {
   const view = new WebContentsView();
   win.contentView.addChildView(view);
 
-  // Always fit the web rendering with the electron windows
   function fitViewToWin() {
-    const winSize = win.webContents.getOwnerBrowserWindow().getBounds();
-    view.setBounds({ x: 0, y: 55, width: winSize.width, height: winSize.height });
+    const contentBounds = win.getContentBounds();
+    const width = Math.max(0, contentBounds.width - cookiePanelWidth);
+    const height = Math.max(0, contentBounds.height - toolbarHeight);
+
+    view.setBounds({
+      x: 0,
+      y: toolbarHeight,
+      width,
+      height
+    });
   }
 
   // Register events handling from the toolbar
@@ -81,6 +91,13 @@ app.whenReady().then(() => {
     view.webContents.loadURL('https://amiens.unilasalle.fr');
   });
 
+  ipcMain.on('cookie-panel-state', (_event, state) => {
+    const { open = false, width = 0 } = state || {};
+    const panelWidth = open ? Math.max(0, width || 600) : 0;
+    cookiePanelWidth = Math.min(panelWidth, win.getContentBounds().width);
+    fitViewToWin();
+  });
+
   // Cookie management handlers
   ipcMain.handle('get-cookies', async () => {
     try {
@@ -108,7 +125,7 @@ app.whenReady().then(() => {
     view.webContents.loadURL('https://amiens.unilasalle.fr');
   });
 
-  win.on('resized', () => {
+  win.on('resize', () => {
     fitViewToWin();
   });
 
@@ -117,14 +134,5 @@ app.whenReady().then(() => {
     win.webContents.send('url-changed', view.webContents.getURL());
   });
 
-
-  function fitViewToWin() {
-        const winSize = win.webContents.getOwnerBrowserWindow().getBounds();
-        view.setBounds({ x: 0, y: 128, width: winSize.width, height: winSize.height - 128 });
-    }
-
-  win.on('resize', () => {
-        fitViewToWin();
-    });
 
 })
