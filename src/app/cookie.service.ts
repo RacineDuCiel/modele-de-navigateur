@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import type { SimulationLinkDatum, SimulationNodeDatum } from 'd3';
 
 export interface CookieData {
   name: string;
@@ -11,17 +12,18 @@ export interface CookieData {
   sameSite?: string;
 }
 
-export interface CookieGraphNode {
+export interface CookieGraphNode extends SimulationNodeDatum {
   id: string;
   label: string;
   type: 'domain' | 'cookie';
   domain?: string;
+  rawDomain?: string;
   cookieCount?: number;
 }
 
-export interface CookieGraphLink {
-  source: string;
-  target: string;
+export interface CookieGraphLink extends SimulationLinkDatum<CookieGraphNode> {
+  source: string | CookieGraphNode;
+  target: string | CookieGraphNode;
 }
 
 @Injectable({
@@ -36,7 +38,39 @@ export class CookieService {
 
   async getAllCookies(): Promise<CookieData[]> {
     try {
-      return await this.electronAPI.getCookies();
+      const cookies: CookieData[] = await this.electronAPI.getCookies();
+      const deduped = new Map<string, CookieData>();
+
+      cookies.forEach((cookie) => {
+        const key = `${cookie.domain}::${cookie.path ?? ''}::${cookie.name}`;
+        const existing = deduped.get(key);
+
+        if (!existing) {
+          deduped.set(key, cookie);
+          return;
+        }
+
+        const existingExpiration = existing.expirationDate ?? 0;
+        const candidateExpiration = cookie.expirationDate ?? 0;
+
+        if (candidateExpiration > existingExpiration) {
+          deduped.set(key, cookie);
+        }
+      });
+
+      return Array.from(deduped.values()).sort((a, b) => {
+        const domainCompare = this.normalizeDomain(a.domain).localeCompare(this.normalizeDomain(b.domain));
+        if (domainCompare !== 0) {
+          return domainCompare;
+        }
+
+        const nameCompare = a.name.localeCompare(b.name);
+        if (nameCompare !== 0) {
+          return nameCompare;
+        }
+
+        return (a.path ?? '').localeCompare(b.path ?? '');
+      });
     } catch (error) {
       console.error('Error fetching cookies:', error);
       return [];
@@ -52,14 +86,6 @@ export class CookieService {
     }
   }
 
-  setCookiePanelState(state: { open: boolean; width: number }): void {
-    try {
-      this.electronAPI?.setCookiePanelState?.(state);
-    } catch (error) {
-      console.error('Error notifying cookie panel state:', error);
-    }
-  }
-
   /**
    * Transforme les cookies en données de graphe
    * Retourne les nœuds (domaines et cookies) et les liens
@@ -68,39 +94,41 @@ export class CookieService {
     const cookies = await this.getAllCookies();
     const nodes: CookieGraphNode[] = [];
     const links: CookieGraphLink[] = [];
-    const domainMap = new Map<string, number>();
+    const domainMap = new Map<string, { count: number; rawDomains: Set<string> }>();
 
     // Grouper les cookies par domaine
     cookies.forEach(cookie => {
-      const domain = cookie.domain;
-      if (domainMap.has(domain)) {
-        domainMap.set(domain, domainMap.get(domain)! + 1);
-      } else {
-        domainMap.set(domain, 1);
-      }
+      const normalizedDomain = this.normalizeDomain(cookie.domain);
+      const entry = domainMap.get(normalizedDomain) ?? { count: 0, rawDomains: new Set<string>() };
+      entry.count += 1;
+      entry.rawDomains.add(cookie.domain);
+      domainMap.set(normalizedDomain, entry);
     });
 
     // Créer les nœuds de domaine
-    domainMap.forEach((count, domain) => {
+    domainMap.forEach((value, domain) => {
       nodes.push({
         id: `domain-${domain}`,
         label: domain,
         type: 'domain',
-        domain: domain,
-        cookieCount: count
+        domain,
+        rawDomain: Array.from(value.rawDomains)[0],
+        cookieCount: value.count
       });
     });
 
     // Créer les nœuds de cookies et les liens
     cookies.forEach(cookie => {
-      const cookieId = `cookie-${cookie.domain}-${cookie.name}`;
-      const domainId = `domain-${cookie.domain}`;
+      const normalizedDomain = this.normalizeDomain(cookie.domain);
+      const cookieId = `cookie-${normalizedDomain}-${cookie.name}-${cookie.path ?? ''}`;
+      const domainId = `domain-${normalizedDomain}`;
       
       nodes.push({
         id: cookieId,
         label: cookie.name,
         type: 'cookie',
-        domain: cookie.domain
+        domain: normalizedDomain,
+        rawDomain: cookie.domain
       });
 
       links.push({
@@ -130,7 +158,7 @@ export class CookieService {
 
     cookies.forEach(cookie => {
       // Compter par domaine
-      const domain = cookie.domain;
+      const domain = this.normalizeDomain(cookie.domain);
       domainMap.set(domain, (domainMap.get(domain) || 0) + 1);
       
       // Compter les types de cookies
@@ -150,5 +178,21 @@ export class CookieService {
       httpOnlyCookies,
       domainStats
     };
+  }
+
+  setCookiePanelState(state: { open: boolean; width: number }): void {
+    try {
+      this.electronAPI?.setCookiePanelState?.(state);
+    } catch (error) {
+      console.error('Error notifying cookie panel state:', error);
+    }
+  }
+
+  private normalizeDomain(domain: string): string {
+    if (!domain) {
+      return '';
+    }
+
+    return domain.startsWith('.') ? domain.substring(1) : domain;
   }
 }

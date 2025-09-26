@@ -22,6 +22,9 @@
         <button mat-icon-button (click)="refreshCookies()" matTooltip="Actualiser">
           <mat-icon>refresh</mat-icon>
         </button>
+        <button mat-icon-button (click)="resetGraphView()" matTooltip="Recentrer le graphe" [disabled]="!graphInitialized">
+          <mat-icon>center_focus_strong</mat-icon>
+        </button>
         <button mat-icon-button (click)="toggleCookiePanel()" matTooltip="Fermer">
           <mat-icon>close</mat-icon>
         </button>

@@ -158,6 +158,27 @@ mat-tab-group {
   border-radius: 4px;
   position: relative;
   margin-bottom: 16px;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.cookie-graph:active {
+  cursor: grabbing;
+}
+
+.cookie-graph svg {
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  touch-action: none;
+}
+
+.cookie-graph-nodes circle {
+  cursor: grab;
+}
+
+.cookie-graph-nodes circle:active {
+  cursor: grabbing;
 }
 
 .graph-legend {
