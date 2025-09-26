@@ -1,0 +1,162 @@
+<button mat-mini-fab 
+        color="primary" 
+        (click)="toggleCookiePanel()"
+        matTooltip="Voir les cookies"
+        [matBadge]="cookieStats?.totalCookies || 0"
+        matBadgeColor="warn"
+        matBadgeSize="small">
+  <mat-icon>cookie</mat-icon>
+</button>
+
+<!-- Panel des cookies -->
+<div class="cookie-panel" [class.show]="showCookiePanel">
+  <div class="cookie-panel-content">
+    
+    <!-- Header du panel -->
+    <div class="cookie-header">
+      <h2>
+        <mat-icon>cookie</mat-icon>
+        Analyse des Cookies
+      </h2>
+      <div class="cookie-actions">
+        <button mat-icon-button (click)="refreshCookies()" matTooltip="Actualiser">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleCookiePanel()" matTooltip="Fermer">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <mat-tab-group>
+      
+      <!-- Onglet Statistiques -->
+      <mat-tab label="Statistiques">
+        <div class="stats-container" *ngIf="cookieStats">
+          <div class="stats-grid">
+            
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-number">{{ cookieStats.totalCookies }}</div>
+                <div class="stat-label">Total Cookies</div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-number">{{ cookieStats.uniqueDomains }}</div>
+                <div class="stat-label">Domaines</div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-number">{{ cookieStats.secureCookies }}</div>
+                <div class="stat-label">Sécurisés</div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-number">{{ cookieStats.httpOnlyCookies }}</div>
+                <div class="stat-label">HTTP Only</div>
+              </mat-card-content>
+            </mat-card>
+            
+          </div>
+          
+          <!-- Top domaines -->
+          <mat-card class="domain-stats">
+            <mat-card-header>
+              <mat-card-title>Domaines les plus actifs</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="domain-list">
+                <div *ngFor="let stat of cookieStats.domainStats.slice(0, 10)" class="domain-item">
+                  <span class="domain-name">{{ formatDomain(stat.domain) }}</span>
+                  <span class="domain-count">{{ stat.count }} cookies</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Onglet Liste détaillée -->
+      <mat-tab label="Liste détaillée">
+        <div class="table-container">
+          <mat-table [dataSource]="cookies" class="cookie-table">
+            
+            <ng-container matColumnDef="name">
+              <mat-header-cell *matHeaderCellDef>Nom</mat-header-cell>
+              <mat-cell *matCellDef="let cookie">{{ cookie.name }}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="domain">
+              <mat-header-cell *matHeaderCellDef>Domaine</mat-header-cell>
+              <mat-cell *matCellDef="let cookie">{{ formatDomain(cookie.domain) }}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="value">
+              <mat-header-cell *matHeaderCellDef>Valeur</mat-header-cell>
+              <mat-cell *matCellDef="let cookie">
+                <span class="cookie-value">{{ formatCookieValue(cookie.value) }}</span>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="secure">
+              <mat-header-cell *matHeaderCellDef>Sécurisé</mat-header-cell>
+              <mat-cell *matCellDef="let cookie">
+                <mat-icon [color]="cookie.secure ? 'primary' : 'warn'" class="security-icon">
+                  {{ cookie.secure ? 'lock' : 'lock_open' }}
+                </mat-icon>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="httpOnly">
+              <mat-header-cell *matHeaderCellDef>HTTP Only</mat-header-cell>
+              <mat-cell *matCellDef="let cookie">
+                <mat-icon [color]="cookie.httpOnly ? 'primary' : 'warn'" class="security-icon">
+                  {{ cookie.httpOnly ? 'check' : 'close' }}
+                </mat-icon>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="path">
+              <mat-header-cell *matHeaderCellDef>Chemin</mat-header-cell>
+              <mat-cell *matCellDef="let cookie">{{ cookie.path }}</mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          </mat-table>
+        </div>
+      </mat-tab>
+
+      <!-- Onglet Graphique -->
+      <mat-tab label="Visualisation">
+        <div class="graph-container">
+          <div #cookieGraph class="cookie-graph">
+            <!-- Le graphique D3 sera injecté ici -->
+          </div>
+          <div class="graph-legend">
+            <div class="legend-item">
+              <div class="legend-color domain-color"></div>
+              <span>Domaines</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color cookie-color"></div>
+              <span>Cookies</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+</div>
+
+<!-- Overlay pour fermer le panel -->
+<div class="cookie-overlay" 
+     [class.show]="showCookiePanel" 
+     (click)="toggleCookiePanel()"></div>

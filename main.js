@@ -81,6 +81,27 @@ app.whenReady().then(() => {
     view.webContents.loadURL('https://amiens.unilasalle.fr');
   });
 
+  // Cookie management handlers
+  ipcMain.handle('get-cookies', async () => {
+    try {
+      const cookies = await view.webContents.session.cookies.get({});
+      return cookies;
+    } catch (error) {
+      console.error('Error getting cookies:', error);
+      return [];
+    }
+  });
+
+  ipcMain.handle('get-cookies-for-domain', async (event, domain) => {
+    try {
+      const cookies = await view.webContents.session.cookies.get({ domain });
+      return cookies;
+    } catch (error) {
+      console.error('Error getting cookies for domain:', error);
+      return [];
+    }
+  });
+
   //Register events handling from the main windows
   win.once('ready-to-show', () => {
     fitViewToWin();
@@ -96,5 +117,14 @@ app.whenReady().then(() => {
     win.webContents.send('url-changed', view.webContents.getURL());
   });
 
+
+  function fitViewToWin() {
+        const winSize = win.webContents.getOwnerBrowserWindow().getBounds();
+        view.setBounds({ x: 0, y: 128, width: winSize.width, height: winSize.height - 128 });
+    }
+
+  win.on('resize', () => {
+        fitViewToWin();
+    });
 
 })
