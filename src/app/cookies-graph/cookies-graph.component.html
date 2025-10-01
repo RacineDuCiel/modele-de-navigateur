@@ -1,0 +1,97 @@
+<div class="graph-container-wrapper">
+  <div class="header">
+    <h1>📊 Visualisation des Cookies (Graphe)</h1>
+    <div class="button-group">
+      <button class="btn btn-secondary" (click)="goBack()">← Retour</button>
+      <button class="btn btn-primary" (click)="navigateToList()">📋 Vue liste</button>
+      <button class="btn btn-refresh" (click)="loadCookies()">🔄 Actualiser</button>
+      <button class="btn btn-zoom" (click)="resetZoom()">🔍 Reset Zoom</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-icon">🍪</span>
+      <span class="stat-value">{{ stats.totalCookies }}</span>
+      <span class="stat-label">Cookies</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-icon">🌐</span>
+      <span class="stat-value">{{ stats.totalDomains }}</span>
+      <span class="stat-label">Domaines</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-icon">🔗</span>
+      <span class="stat-value">{{ stats.connections }}</span>
+      <span class="stat-label">Connexions</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-circle domain-circle"></div>
+      <span>Domaine</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-circle cookie-circle"></div>
+      <span>Cookie</span>
+    </div>
+    <div class="legend-note">
+      💡 Glissez pour déplacer les nœuds • Molette pour zoomer • Cliquez pour les détails
+    </div>
+  </div>
+
+  <div class="graph-wrapper">
+    <div #graphContainer class="graph-container"></div>
+    
+    <div class="details-panel" *ngIf="selectedNode" [@slideIn]>
+      <button class="close-btn" (click)="closeDetails()">✕</button>
+      
+      <div *ngIf="selectedNode.type === 'domain'" class="detail-content">
+        <h3>🌐 Domaine</h3>
+        <div class="detail-field">
+          <strong>Nom:</strong>
+          <span>{{ selectedNode.name }}</span>
+        </div>
+        <div class="detail-field">
+          <strong>Nombre de cookies:</strong>
+          <span class="highlight">{{ selectedNode.count }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="selectedNode.type === 'cookie' && selectedNode.cookie" class="detail-content">
+        <h3>🍪 Cookie</h3>
+        <div class="detail-field">
+          <strong>Nom:</strong>
+          <span>{{ selectedNode.cookie.name }}</span>
+        </div>
+        <div class="detail-field">
+          <strong>Domaine:</strong>
+          <span>{{ selectedNode.cookie.domain }}</span>
+        </div>
+        <div class="detail-field">
+          <strong>Valeur:</strong>
+          <span class="cookie-value-text">{{ formatCookieValue(selectedNode.cookie.value) }}</span>
+        </div>
+        <div class="detail-field">
+          <strong>Chemin:</strong>
+          <span>{{ selectedNode.cookie.path }}</span>
+        </div>
+        <div class="detail-field">
+          <strong>Sécurité:</strong>
+          <div class="security-badges">
+            <span *ngIf="selectedNode.cookie.secure" class="badge badge-secure">🔒 Secure</span>
+            <span *ngIf="selectedNode.cookie.httpOnly" class="badge badge-httponly">🛡️ HttpOnly</span>
+            <span *ngIf="selectedNode.cookie.sameSite" class="badge badge-samesite">🔗 {{ selectedNode.cookie.sameSite }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="stats.totalCookies === 0">
+    <div class="empty-icon">🍪</div>
+    <h2>Aucun cookie à visualiser</h2>
+    <p>Naviguez sur des sites web pour collecter des cookies et les visualiser ici.</p>
+  </div>
+</div>

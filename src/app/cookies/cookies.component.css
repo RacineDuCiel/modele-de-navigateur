@@ -1,0 +1,256 @@
+.cookies-container {
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #2c3e50;
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.header h1 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 14px;
+  border: 1px solid #d1d9e0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  transition: all 0.15s ease;
+  background: white;
+  color: #2c3e50;
+}
+
+.btn:hover {
+  background: #f7f9fa;
+  border-color: #b8c2cc;
+}
+
+.btn-primary {
+  background: #2c3e50;
+  color: white;
+  border-color: #2c3e50;
+}
+
+.btn-primary:hover {
+  background: #1a252f;
+  border-color: #1a252f;
+}
+
+.btn-secondary {
+  background: white;
+}
+
+.btn-danger {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.btn-danger:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-warning {
+  color: #f39c12;
+  border-color: #f39c12;
+}
+
+.btn-warning:hover {
+  background: #f39c12;
+  color: white;
+}
+
+.btn-delete-domain {
+  margin-left: auto;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.filter-item label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #657786;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.search-input,
+.domain-select {
+  padding: 9px 12px;
+  border: 1px solid #d1d9e0;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #2c3e50;
+  background: white;
+  transition: all 0.15s ease;
+}
+
+.search-input:focus,
+.domain-select:focus {
+  outline: none;
+  border-color: #2c3e50;
+}
+
+/* Summary */
+.summary {
+  padding: 12px 0;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #657786;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+/* Cookies List */
+.cookies-list {
+  margin-top: 24px;
+}
+
+.domain-section {
+  margin-bottom: 32px;
+}
+
+.domain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #2c3e50;
+}
+
+.domain-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.domain-count {
+  font-size: 12px;
+  color: #657786;
+  background: #f7f9fa;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.cookies-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: #e1e8ed;
+  border: 1px solid #e1e8ed;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cookie-row {
+  background: white;
+  transition: background 0.15s ease;
+}
+
+.cookie-row:hover {
+  background: #f7f9fa;
+}
+
+.cookie-info {
+  padding: 12px 16px;
+}
+
+.info-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.info-line:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #657786;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.value {
+  flex: 1;
+  font-size: 13px;
+  color: #2c3e50;
+  word-break: break-word;
+}
+
+.name-value {
+  font-weight: 500;
+}
+
+.code-value {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 12px;
+  color: #657786;
+  background: #f7f9fa;
+  padding: 4px 8px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.badges {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.badge {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.no-cookies {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 14px;
+}
+
+.no-cookies p {
+  margin: 0;
+}

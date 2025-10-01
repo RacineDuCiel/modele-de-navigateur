@@ -1,0 +1,73 @@
+<div class="cookies-container">
+  <div class="header">
+    <h1>🍪 Cookies</h1>
+    <div class="button-group">
+      <button class="btn btn-secondary" (click)="goBack()">← Retour</button>
+      <button class="btn btn-primary" (click)="navigateToGraph()">📊 Graphe</button>
+      <button class="btn btn-danger" (click)="clearAll()" *ngIf="cookies.length > 0">�️ Tout supprimer</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-item">
+      <label>Recherche</label>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearchChange()"
+        placeholder="Rechercher un cookie..."
+        class="search-input"
+      />
+    </div>
+    
+    <div class="filter-item">
+      <label>Domaine</label>
+      <select [(ngModel)]="selectedDomain" (change)="onDomainChange()" class="domain-select">
+        <option value="all">Tous ({{ cookies.length }})</option>
+        <option *ngFor="let domain of domains" [value]="domain">
+          {{ domain }}
+        </option>
+      </select>
+    </div>
+
+    <button class="btn btn-warning btn-delete-domain" (click)="deleteDomain()" *ngIf="selectedDomain !== 'all'">
+      🗑️ Supprimer domaine
+    </button>
+  </div>
+
+  <div class="summary">
+    {{ filteredCookies.length }} cookies • {{ domains.length }} domaines • {{ getSecureCount() }} sécurisés
+  </div>
+
+  <div class="cookies-list" *ngIf="filteredCookies.length > 0">
+    <div *ngFor="let entry of getCookiesByDomain() | keyvalue" class="domain-section">
+      <div class="domain-header">
+        <span class="domain-name">{{ entry.key }}</span>
+        <span class="domain-count">{{ entry.value.length }} cookie{{ entry.value.length > 1 ? 's' : '' }}</span>
+      </div>
+      
+      <div class="cookies-table">
+        <div *ngFor="let cookie of entry.value" class="cookie-row">
+          <div class="cookie-info">
+            <div class="info-line">
+              <span class="label">Nom:</span>
+              <span class="value name-value">{{ cookie.name }}</span>
+              <span class="badges">
+                <span *ngIf="cookie.secure" class="badge secure" title="Sécurisé">🔒</span>
+                <span *ngIf="cookie.httpOnly" class="badge httponly" title="HTTP Only">🛡️</span>
+              </span>
+            </div>
+            <div class="info-line">
+              <span class="label">Valeur:</span>
+              <span class="value code-value">{{ cookie.value.length > 80 ? cookie.value.substring(0, 80) + '...' : cookie.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-cookies" *ngIf="filteredCookies.length === 0">
+    <p>Aucun cookie trouvé</p>
+  </div>
+</div>

@@ -13,5 +13,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   onNavigationUpdated: (callback) => {
     ipcRenderer.on('navigation-updated', (event, url) => callback(url));
-  }
+  },
+
+  // View visibility control
+  hideWebView: () => ipcRenderer.send('hide-web-view'),
+  showWebView: () => ipcRenderer.send('show-web-view'),
+
+  // Cookie management API
+  getCookies: () => ipcRenderer.invoke('get-cookies'),
+  getCookiesForUrl: (url) => ipcRenderer.invoke('get-cookies-for-url', url),
+  onCookieChanged: (callback) => {
+    ipcRenderer.on('cookie-changed', (event, data) => callback(data));
+  },
+  clearAllCookies: () => ipcRenderer.invoke('clear-all-cookies'),
+  deleteCookiesByDomain: (domain) => ipcRenderer.invoke('delete-cookies-by-domain', domain)
 })
+

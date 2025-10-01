@@ -1,4 +1,4 @@
-const { app, WebContentsView, BrowserWindow, ipcMain } = require('electron');
+const { app, WebContentsView, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('node:path');
 
 app.whenReady().then(() => {
@@ -67,6 +67,97 @@ app.whenReady().then(() => {
 
   ipcMain.handle('current-url', () => {
     return view.webContents.getURL();
+  });
+
+  // View visibility management
+  ipcMain.on('hide-web-view', () => {
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+  });
+
+  ipcMain.on('show-web-view', () => {
+    fitViewToWin();
+  });
+
+  // Cookie management handlers
+  ipcMain.handle('get-cookies', async () => {
+    try {
+      const cookies = await session.defaultSession.cookies.get({});
+      return cookies.map(cookie => ({
+        name: cookie.name,
+        value: cookie.value,
+        domain: cookie.domain,
+        path: cookie.path,
+        secure: cookie.secure,
+        httpOnly: cookie.httpOnly,
+        expirationDate: cookie.expirationDate,
+        sameSite: cookie.sameSite
+      }));
+    } catch (error) {
+      console.error('Error fetching cookies:', error);
+      return [];
+    }
+  });
+
+  ipcMain.handle('get-cookies-for-url', async (event, url) => {
+    try {
+      const cookies = await session.defaultSession.cookies.get({ url });
+      return cookies.map(cookie => ({
+        name: cookie.name,
+        value: cookie.value,
+        domain: cookie.domain,
+        path: cookie.path,
+        secure: cookie.secure,
+        httpOnly: cookie.httpOnly,
+        expirationDate: cookie.expirationDate,
+        sameSite: cookie.sameSite
+      }));
+    } catch (error) {
+      console.error('Error fetching cookies for URL:', error);
+      return [];
+    }
+  });
+
+  // Listen to cookie changes and notify the renderer
+  session.defaultSession.cookies.on('changed', (event, cookie, cause, removed) => {
+    win.webContents.send('cookie-changed', {
+      cookie: {
+        name: cookie.name,
+        value: cookie.value,
+        domain: cookie.domain,
+        path: cookie.path,
+        secure: cookie.secure,
+        httpOnly: cookie.httpOnly,
+        expirationDate: cookie.expirationDate,
+        sameSite: cookie.sameSite
+      },
+      cause,
+      removed
+    });
+  });
+
+  // Delete cookies
+  ipcMain.handle('clear-all-cookies', async () => {
+    try {
+      await session.defaultSession.clearStorageData({ storages: ['cookies'] });
+      return { success: true };
+    } catch (error) {
+      console.error('Error clearing cookies:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('delete-cookies-by-domain', async (event, domain) => {
+    try {
+      const cookies = await session.defaultSession.cookies.get({ domain });
+      for (const cookie of cookies) {
+        const url = `${cookie.secure ? 'https' : 'http'}://${cookie.domain}${cookie.path}`;
+        await session.defaultSession.cookies.remove(url, cookie.name);
+      }
+      return { success: true, count: cookies.length };
+    } catch (error) {
+      console.error('Error deleting cookies:', error);
+      return { success: false, error: error.message };
+    }
   });
 
   //Register events handling from the main windows

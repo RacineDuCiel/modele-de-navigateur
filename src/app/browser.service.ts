@@ -1,4 +1,22 @@
 import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+export interface Cookie {
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+  secure: boolean;
+  httpOnly: boolean;
+  expirationDate?: number;
+  sameSite?: string;
+}
+
+export interface CookieChangeEvent {
+  cookie: Cookie;
+  cause: string;
+  removed: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +26,9 @@ export class BrowserService {
   url = 'https://amiens.unilasalle.fr';
   canGoBack = false;
   canGoForward = false;
+
+  private cookiesSubject = new BehaviorSubject<Cookie[]>([]);
+  public cookies$: Observable<Cookie[]> = this.cookiesSubject.asObservable();
 
 // @ts-ignore
   electronAPI = window.electronAPI;
@@ -20,6 +41,16 @@ export class BrowserService {
         this.ngZone.run(() => {
           this.url = newUrl;
           this.updateHistory();
+          this.refreshCookies(); // Refresh cookies on navigation
+        });
+      });
+    }
+
+    // Listen to cookie changes
+    if (this.electronAPI && this.electronAPI.onCookieChanged) {
+      this.electronAPI.onCookieChanged((data: CookieChangeEvent) => {
+        this.ngZone.run(() => {
+          this.refreshCookies();
         });
       });
     }
@@ -67,5 +98,62 @@ export class BrowserService {
 
     this.electronAPI.canGoForward()
       .then((canGoForward : boolean) => this.canGoForward = canGoForward);
+  }
+
+  // Cookie management methods
+  async getCookies(): Promise<Cookie[]> {
+    if (this.electronAPI && this.electronAPI.getCookies) {
+      const cookies = await this.electronAPI.getCookies();
+      this.cookiesSubject.next(cookies);
+      return cookies;
+    }
+    return [];
+  }
+
+  async getCookiesForUrl(url: string): Promise<Cookie[]> {
+    if (this.electronAPI && this.electronAPI.getCookiesForUrl) {
+      return await this.electronAPI.getCookiesForUrl(url);
+    }
+    return [];
+  }
+
+  refreshCookies(): void {
+    this.getCookies();
+  }
+
+  getCurrentCookies(): Cookie[] {
+    return this.cookiesSubject.value;
+  }
+
+  // View visibility control
+  hideWebView(): void {
+    if (this.electronAPI && this.electronAPI.hideWebView) {
+      this.electronAPI.hideWebView();
+    }
+  }
+
+  showWebView(): void {
+    if (this.electronAPI && this.electronAPI.showWebView) {
+      this.electronAPI.showWebView();
+    }
+  }
+
+  // Cookie deletion methods
+  async clearAllCookies(): Promise<any> {
+    if (this.electronAPI && this.electronAPI.clearAllCookies) {
+      const result = await this.electronAPI.clearAllCookies();
+      this.refreshCookies();
+      return result;
+    }
+    return { success: false };
+  }
+
+  async deleteCookiesByDomain(domain: string): Promise<any> {
+    if (this.electronAPI && this.electronAPI.deleteCookiesByDomain) {
+      const result = await this.electronAPI.deleteCookiesByDomain(domain);
+      this.refreshCookies();
+      return result;
+    }
+    return { success: false };
   }
 }
