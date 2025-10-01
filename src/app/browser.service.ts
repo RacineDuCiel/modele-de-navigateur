@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,19 @@ export class BrowserService {
 
 // @ts-ignore
   electronAPI = window.electronAPI;
+
+  constructor(private ngZone: NgZone) {
+    // Listen to navigation updates from Electron
+    if (this.electronAPI && this.electronAPI.onNavigationUpdated) {
+      this.electronAPI.onNavigationUpdated((newUrl: string) => {
+        // Run inside Angular's zone to trigger change detection
+        this.ngZone.run(() => {
+          this.url = newUrl;
+          this.updateHistory();
+        });
+      });
+    }
+  }
 
   toogleDevTool() {
     this.electronAPI.toogleDevTool();
@@ -28,6 +41,10 @@ export class BrowserService {
 
   refresh() {
     this.electronAPI.refresh();
+  }
+
+  goHome() {
+    this.goToPage('https://amiens.unilasalle.fr');
   }
 
   goToPage(url: string) {

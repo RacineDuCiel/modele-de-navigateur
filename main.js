@@ -29,7 +29,7 @@ app.whenReady().then(() => {
     view.setBounds({ x: 0, y: 55, width: winSize.width, height: winSize.height });
   }
 
-    win.webContents.openDevTools({ mode: 'detach' });
+    //win.webContents.openDevTools({ mode: 'detach' });
 
   // Register events handling from the toolbar
   ipcMain.on('toogle-dev-tool', () => {
@@ -78,4 +78,18 @@ app.whenReady().then(() => {
   win.on('resized', () => {
     fitViewToWin();
   });
-})
+
+  // Listen to navigation events to update the address bar
+  view.webContents.on('did-navigate', (event, url) => {
+    win.webContents.send('navigation-updated', url);
+  });
+
+  view.webContents.on('did-navigate-in-page', (event, url) => {
+    win.webContents.send('navigation-updated', url);
+  });
+
+  //resize the view when the window is resized
+  win.on('resize', () => {
+    fitViewToWin();
+  });
+});
