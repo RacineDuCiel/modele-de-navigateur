@@ -82,6 +82,13 @@ jobs:
           name: macos-builds
           path: releases/macos
 
+      - name: List downloaded files
+        run: |
+          echo "Linux files:"
+          ls -lah releases/linux/
+          echo "macOS files:"
+          ls -lah releases/macos/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -90,7 +97,9 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            releases/linux/*
-            releases/macos/*
+            releases/linux/*.AppImage
+            releases/linux/*.zip
+            releases/macos/*.dmg
+            releases/macos/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
