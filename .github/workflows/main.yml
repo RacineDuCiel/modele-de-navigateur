@@ -101,14 +101,14 @@ jobs:
             
             ### Linux
             - Téléchargez le fichier `.AppImage`
-            - Rendez-le exécutable : `chmod +x "Navigateur-Electron-*.AppImage"`
+            - Rendez-le exécutable : `chmod +x "browser-template-*.AppImage"`
             - Lancez l'application
             
             ### macOS
             **Important :** Cette application n'étant pas signée avec un certificat Apple, macOS peut la bloquer pour des raisons de sécurité (gatekeeper). Pour contourner ce problème il est nécessaire de taper cette commande dans le terminal après avoir déplacé l'app dans le dossier Applications :
 
             ```bash
-            xattr -cr "/Applications/Navigateur-Electron.app"
+            xattr -cr "/Applications/browser-template.app"
             ```
 
             ### Depuis la source :

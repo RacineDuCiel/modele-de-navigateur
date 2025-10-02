@@ -54,8 +54,8 @@
     "wait-on": "^8.0.0"
   },
   "build": {
-    "appId": "fr.unilasalle.navigateur-electron",
-    "productName": "Navigateur-Electron",
+    "appId": "fr.unilasalle.browser-template",
+    "productName": "browser-template",
     "directories": {
       "output": "releases"
     },
