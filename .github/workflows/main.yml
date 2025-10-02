@@ -112,7 +112,7 @@ jobs:
             ```
 
             ### Depuis la source :
-            - Installez [Node.js](https://nodejs.org/) (version 18 recommandée)
+            - Installez [Node.js](https://nodejs.org/)
             - Clonez ce dépôt : `git clone https://github.com/RacineDuCiel/modele-de-navigateur.git`
             - Allez dans le dossier : `cd modele-de-navigateur`
             - Installez les dépendances : `npm install`
