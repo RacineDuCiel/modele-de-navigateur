@@ -54,8 +54,8 @@
     "wait-on": "^8.0.0"
   },
   "build": {
-    "appId": "fr.unilasalle.browser-template",
-    "productName": "Browser Template",
+    "appId": "fr.unilasalle.navigateur-electron",
+    "productName": "Navigateur-Electron",
     "directories": {
       "output": "releases"
     },
@@ -76,7 +76,10 @@
         "dmg",
         "zip"
       ],
-      "category": "public.app-category.developer-tools"
+      "category": "public.app-category.developer-tools",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
     }
   }
 }
